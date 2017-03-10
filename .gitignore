@@ -1,0 +1,16 @@
+.DS_Store
+
+# 编辑器
+/.idea/
+/.idea/*
+
+# nodejs 编译时使用
+/node_modules/
+/node_modules/*
+*/node_modules/
+*/node_modules/*
+
+# 代码日志
+*/*/logs/
+*/*/logs/*
+/npm-debug.log

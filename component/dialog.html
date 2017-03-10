@@ -1,0 +1,20 @@
+<div class="ui-dialog-over" :on="click:cancel">
+	<div class="ui-dialog">
+		<header :bind="title" :if="title"></header>
+		<section class="ui-dialog-content">
+			<div :bind="html:content"></div>
+			<input class="ui-dialog-input" type="text" value="" :if="is_prompt" :bind="value:value">
+		</section>
+		<footer :if="is_alert">
+			<a href="#" class="ui-btn btn-sure" :on="click:ok">确定</a>
+		</footer>
+		<footer :if="is_confirm">
+			<a href="#" class="ui-btn btn-cancel cancel" :on="click/s:cancel">取消</a>
+			<a href="#" class="ui-btn btn-sure" :on="click:ok">确定</a>
+		</footer>
+		<footer :if="is_prompt">
+			<a href="#" class="ui-btn btn-cancel cancel" :on="click/s:cancel">取消</a>
+			<a href="#" class="ui-btn btn-sure" :on="click:ok">确定</a>
+		</footer>
+	</div>
+</div>

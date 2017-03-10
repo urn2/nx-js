@@ -1,0 +1,14 @@
+<div class="ui-pages" :if="show">
+	<a href="#F" :on="click:click:F" :bind="html:first|disabled:disable_first|title:_first" :if="first"></a>
+	<a href="#P" :on="click:click:P" :bind="html:prev|disabled:disable_prev|title:_prev" :if="prev"></a>
+	<span :for="buttons" :if="button">
+		<a href="#"{{page}} :on="click:click:{{page}}" class="{{class}}">{{page}}</a>
+	</span>
+	<select :on="change:change" :for="options" :if="select">
+		{{#current}}<option value="{{page}}" selected="selected">{{page}}</option>{{/current}}
+		{{^current}}<option value="{{page}}">{{page}}</option>{{/current}}
+	</select>
+	<span :if="status"><i :bind="page"></i>/<b :bind="_last"></b></span>
+	<a href="#N" :on="click:click:N" :bind="html:next|disabled:disable_next|title:_next" :if="next"></a>
+	<a href="#L" :on="click:click:L" :bind="html:last|disabled:disable_last|title:_last" :if="last"></a>
+</div>

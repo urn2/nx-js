@@ -1,0 +1,34 @@
+
+{{#layout}}
+
+{{#title}}<h2 class="sub-header">{{.}}</h2>{{/title}}
+<div class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+		<tr>
+			{{#columns}}
+			<th>{{.}}</th>
+			{{/columns}}
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td colspan="{{columns_length}}">稍等，查询中</td>
+		</tr>
+		</tbody>
+	</table>
+	<ui-pages :bind="pages" :on="page:page" promise="true"></ui-pages>
+</div>
+
+{{/layout}}
+
+{{#data}}
+
+{{#columns}}
+<tr data-id="{{id}}">
+	{{#column}}
+	<td>{{.}}</td>
+	{{/column}}
+</tr>
+{{/columns}}
+{{/data}}
