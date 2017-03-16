@@ -5,6 +5,8 @@ var path = require('path');
 module.exports ={
 	entry:{
 		todo:path.resolve(__dirname, 'todo/app.js'),
+		class:path.resolve(__dirname, 'demo-class/app.js'),
+		bind:path.resolve(__dirname, 'demo-bind/app.js'),
 	},
 	output:{
 		path:path.resolve(__dirname, 'web'),

@@ -9,8 +9,7 @@ const makeRender =function(el, str){
 	}
 };
 
-widget.directive('mustache', function(instance, target, attr){
-	if(target[':mustache']) return ;
+widget.colon('mustache', function(instance, target, attr){
 	let [key, tpl_id=false] =attr.value.split(':');
 	let html='';
 	if(tpl_id){
@@ -24,7 +23,6 @@ widget.directive('mustache', function(instance, target, attr){
 	instance.event('data:'+key, (e, value)=>{
 		render(value);
 	});
-	target[':mustache'] =true;
 });
 
 export default widget;
