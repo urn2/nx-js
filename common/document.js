@@ -1,7 +1,9 @@
-'use strict';
 
 import ready from './ready';
+export {ready};
+
 import storage from './storage';
+export {storage};
 
 /**
  * ================================================================================================================= tag
@@ -13,7 +15,7 @@ import storage from './storage';
  * @param content
  * @returns {Element}
  */
-const tag =(name, attr={}, content='')=>{
+export const tag =(name, attr={}, content='')=>{
 	let t =document.createElement(name);
 	for (let p in attr) t[p] =attr[p];
 	let type =content.constructor.name.toLowerCase();
@@ -41,7 +43,7 @@ let audios={};
  * @param mp3
  * @returns {*}
  */
-const audio=(mp3)=>{
+export const audio=(mp3)=>{
 	if(!audios[mp3]){
 		var r={src:mp3};
 		r.el=document.createElement('audio');
@@ -58,11 +60,4 @@ const audio=(mp3)=>{
 		audios[mp3] =r;
 	}
 	return audios[mp3];
-};
-
-export {
-	audio,
-	tag,
-	ready,
-	storage,
 };

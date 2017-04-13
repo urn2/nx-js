@@ -20,6 +20,7 @@ if(!Object.assign){
 const hasProxy=(!!window.Proxy);
 const isString=(v)=>(v.constructor.name) ?v.constructor.name==='String' :(typeof v==='string');
 
+const eventOptionsParameter =false; // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
 const clear=true;
 /**
  * 常量属性设置
@@ -90,8 +91,8 @@ const widget=function(prototype){
 
 		instance[_event_]={};
 		instance.fire=(name, ...data) =>{
-			if(!isString(name) && name[_event_]){//事件已经发生，仅仅做转义处理
-				if(instance[_event_][name[_event_]]) instance[_event_][name[_event_]](name.e, ...data);
+			if(!isString(name) && name['name']){//事件已经发生，仅仅做转义处理
+				if(instance[_event_][name['name']]) instance[_event_][name['name']](name.e, ...data);
 			}else{//不存在此事件，需要产生一个新的事件用来冒泡
 				instance.el.dispatchEvent(new CustomEvent(instance.eventName(name), {
 					bubbles:true,
@@ -104,7 +105,7 @@ const widget=function(prototype){
 			let [, selector=false] =name.split('|');
 			instance[_event_][name]=fun.bind(hasProxy ?instance[_proxy_] :instance);
 
-			if(name=='init') options={once:true};
+			if(name=='init' && eventOptionsParameter) options={once:true};
 			let make=(dom, selector, fn)=>{
 				return function(e){
 					if(selector){
@@ -153,7 +154,7 @@ const widget=function(prototype){
 		let checkXTag=(el)=>{
 			if(el && el.tagName && !el.widget){
 				let name=el.tagName.toLowerCase();
-				widget[_tags_][name] && new widget[_tags_][name](Object.assign({el:el}, getAttr(el)));
+				widget[_tags_][name] && new widget[_tags_][name](Object.assign({el:el, isXTag:true}, getAttr(el)));
 			}
 		};
 		let update=(el)=>{
@@ -179,7 +180,11 @@ const widget=function(prototype){
 			};
 		}(), false);
 
-		if(pt.template){
+		if(pt.isXTag && instance.el.innerHTML.trim().length){
+			let tpl =instance.el.innerHTML;
+			instance.el.innerHTML='';
+			instance.el.innerHTML=tpl;
+		} else if(pt.template){
 			let html=pt.template;
 			if(typeof pt.template==='function') html=pt.template(instance);
 			instance.el.innerHTML=html;
@@ -242,7 +247,7 @@ document.addEventListener('DOMNodeInserted', function(e){
 		let name=e.target.tagName.toLowerCase();
 		widget[_tags_][name] && new widget[_tags_][name](Object.assign({el:e.target}, getAttr(e.target)));
 	}
-});
+}, false);
 /**
  * 渲染标签，需主动调用
  */
@@ -274,14 +279,18 @@ widget.colon('on', function(instance, target, attr){
 			event = type;
 			type = 'click';
 		}
-		let options={};
+		let options=eventOptionsParameter ?{}:false;
 		let sP=false, pD=true;
 		if(type.indexOf('/')> -1){
 			let [type_change, sets] =type.split('/');
 			type=type_change;
-			if(sets.indexOf('c')> -1) options['capture']=true;
-			if(sets.indexOf('o')> -1) options['once']=true;
-			if(sets.indexOf('p')> -1) options['passive']=true;
+			if(eventOptionsParameter){
+				if(sets.indexOf('c')> -1) options['capture']=true;
+				if(sets.indexOf('o')> -1) options['once']=true;
+				if(sets.indexOf('p')> -1) options['passive']=true;
+			} else {
+				if(sets.indexOf('c')> -1) options=true;
+			}
 			if(sets.indexOf('s')> -1) sP=true;
 			if(sets.indexOf('d')> -1) pD=false;
 		}
@@ -289,22 +298,14 @@ widget.colon('on', function(instance, target, attr){
 			target.widget.event(type, (e, ...data2)=>{
 				if(pD) e.preventDefault();
 				if(sP) e.stopPropagation();
-				if(event){
-					let ne={e};
-					ne[_event_]=event;
-					instance.fire(ne, ...data.concat(data2));
-				}
+				if(event) instance.fire({e, 'name':event}, ...data.concat(data2));
 			}, options);
 		}else{
 			target.addEventListener(type, (e, ...data2)=>{//todo 拦截 or 冒泡
 				if(pD) e.preventDefault();
 				if(sP) e.stopPropagation();
-				if(event){
-					let ne={e};
-					ne[_event_]=event;
-					instance.fire(ne, ...data.concat(data2));
-				}
-			}, false);
+				if(event) instance.fire({e, 'name':event}, ...data.concat(data2));
+			}, options);
 		}
 	});
 });
@@ -319,7 +320,7 @@ widget.colon('bind', function(instance, target, attr){
 			instance.event('data:'+key, (e, value)=>{
 				if(!d){
 					d=true;//防止循环触发
-					target.widget.set(key, value);
+					target.widget.set(prop, value);
 					//target.widget[key] =value;
 					d=false;
 				}
@@ -328,12 +329,12 @@ widget.colon('bind', function(instance, target, attr){
 			target.widget.event('data:'+prop, (e, value)=>{
 				if(!d){
 					d=true;//防止循环触发
-					instance.set(prop, value);
+					instance.set(key, value);
 					//instance[prop] =value;
 					d=false;
 				}
 			});
-			target.widget.set(prop, key);
+			target.widget.set(prop, instance[prop]);
 		}else{
 			if(!key){
 				key=prop;
@@ -389,10 +390,11 @@ let _yes_=(value)=>!!value;
 widget.colon('if', function(instance, target, attr){
 	let _do=(attr.value[0]==='!') ?_not_ :_yes_;
 	let key=(attr.value[0]==='!') ?attr.value.substr(1) :attr.value;
+	let display =(target.style.display !=='' && target.style.display !=='none') ?target.style.display :'';
 	let _toggle=function(bool=null){
 		target.style.display=bool===null
-			?((target.style.display=='none') ?'' :'none')
-			:(_do(bool) ?'' :'none');
+			?((target.style.display=='none') ?display :'none')
+			:(_do(bool) ?display :'none');
 	};
 	_toggle(instance[key]);
 	instance.event('data:'+key, (e, value)=>_toggle(value));

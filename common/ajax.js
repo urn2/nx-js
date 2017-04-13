@@ -125,6 +125,7 @@ const ajax =(url, type='xhr')=>{
 					if(b.length>0) url=url+(url.search(/\?/)!= -1 ?'&' :'?')+b;
 					break;
 				case 'POST':
+					if(body.constructor.name!=='Object') break;
 				case 'PUT':
 				case 'DELETE':
 					if(typeof body=='object'){
@@ -172,7 +173,7 @@ const ajax =(url, type='xhr')=>{
 					if(b.length>0) url=url+(url.search(/\?/)!= -1 ?'&' :'?')+b;
 					break;
 				case 'POST':
-					if(body.constructor.name==='FormData') break;
+					if(body.constructor.name!=='Object') break;
 				case 'PUT':
 				case 'DELETE':
 					if(typeof body=='object'){
